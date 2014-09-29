@@ -1,22 +1,20 @@
 package cn.edu.fudan.ee.glasscameracontrol;
-
+import android.hardware.Camera;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
-
 import javax.swing.*;
-
-import android.hardware.Camera;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import com.android.ddmlib.AdbCommandRejectedException;
-
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.TimeoutException;
-
+class CameraParams{
+    public int params1;
+    public int params2;
+}
 public class GlassCameraControl {
     public static final int panelNum = 5;
     public static final String UPDATE_CAMERA_SETTINGS = "Update";
@@ -27,6 +25,7 @@ public class GlassCameraControl {
     private IDevice mDevice;
     static GlassCameraControl glass;
     static Socket socket;
+    static CameraParams cameraParams = new CameraParams();
     public GlassCameraControl()
     {
         mADB = new ADB();
@@ -48,8 +47,8 @@ public class GlassCameraControl {
         final JButton setUpSocket = new JButton("Set Up Socket Connection");
         JPanel[] panel = new JPanel[panelNum];
         JLabel[] label = new JLabel[panelNum];
-        JSlider[] slider = new JSlider[panelNum];
-        JTextField[] val = new JTextField[panelNum];
+        final JSlider[] slider = new JSlider[panelNum];
+        final JTextField[] val = new JTextField[panelNum];
         final JButton button = new JButton(UPDATE_CAMERA_SETTINGS);
         Container contentPane = frame.getContentPane();
         contentPane.setLayout(new GridLayout(panelNum+2,1));
@@ -63,7 +62,7 @@ public class GlassCameraControl {
             panel[i] = new JPanel();
             label[i] = new JLabel("text"+i);
             slider[i] = new JSlider();
-            val[i] = new JTextField("0");
+            val[i] = new JTextField(3);
             panel[i].add(label[i]);
             panel[i].add(slider[i]);
             panel[i].add(val[i]);
@@ -73,16 +72,25 @@ public class GlassCameraControl {
         contentPane.add(button);
         frame.pack();
         frame.setVisible(true);
-        setUpSocket.setEnabled(false);
-        button.setEnabled(false);
+
+        slider[0].addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                val[0].setText("" + slider[0].getValue());
+            }
+        });
+        val[0].addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                slider[0].setValue(new Integer(val[0].getText()));
+            }
+        });
+
         detectDevice.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 glass = new GlassCameraControl();
                 if(glass.mDevice!= null){
-                    setUpSocket.setEnabled(true);
-
-                    detectDevice.setEnabled(false);
                     device.setText("Device:"+glass.mDevice.getSerialNumber());
                 }
             }
@@ -102,15 +110,30 @@ public class GlassCameraControl {
                 }
                 try {
                     socket = new Socket("localhost",PC_LOCAL_PORT);
-                    button.setEnabled(true);
                     socketStatus.setText("OK");
-                    setUpSocket.setEnabled(false);
+
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
+
+            }
+        });
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cameraParams.params1 = new Integer(val[0].getText());
+                try {
+                    ObjectOutputStream transToGlass = new ObjectOutputStream(socket.getOutputStream());
+                    transToGlass.writeObject(cameraParams);
+
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+
             }
         });
 
     }
+
 
 }
