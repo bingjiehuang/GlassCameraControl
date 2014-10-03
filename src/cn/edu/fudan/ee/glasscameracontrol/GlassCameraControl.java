@@ -1,20 +1,18 @@
 package cn.edu.fudan.ee.glasscameracontrol;
-import android.hardware.Camera;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
-import java.net.*;
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import cn.edu.fudan.ee.glasscamera.CameraParams;
 import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.TimeoutException;
-class CameraParams{
-    public int params1;
-    public int params2;
-}
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 public class GlassCameraControl {
     public static final int panelNum = 5;
     public static final String UPDATE_CAMERA_SETTINGS = "Update";
@@ -25,6 +23,7 @@ public class GlassCameraControl {
     private IDevice mDevice;
     static GlassCameraControl glass;
     static Socket socket;
+    static ObjectOutputStream transToGlass;
     static CameraParams cameraParams = new CameraParams();
     public GlassCameraControl()
     {
@@ -111,7 +110,7 @@ public class GlassCameraControl {
                 try {
                     socket = new Socket("localhost",PC_LOCAL_PORT);
                     socketStatus.setText("OK");
-
+                    transToGlass = new ObjectOutputStream(socket.getOutputStream());
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
@@ -121,10 +120,12 @@ public class GlassCameraControl {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                cameraParams.params1 = new Integer(val[0].getText());
+                cameraParams.params1 = slider[0].getValue();
                 try {
-                    ObjectOutputStream transToGlass = new ObjectOutputStream(socket.getOutputStream());
+                    System.out.println(socket.isClosed());
                     transToGlass.writeObject(cameraParams);
+                    System.out.println(cameraParams.params1);
+                    transToGlass.reset();
 
                 } catch (IOException e1) {
                     e1.printStackTrace();
