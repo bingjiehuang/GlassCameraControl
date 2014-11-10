@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="CameraParams">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../CameraParams/out/artifacts/CameraParams_jar/CameraParams.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../CameraParams-master/out/artifacts/CameraParams_jar/CameraParams.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
