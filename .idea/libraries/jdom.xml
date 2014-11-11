@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="ddmlib">
+  <library name="jdom">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/myJar/ddmlib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/myJar/jdom.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/GlassCameraControl.iml" filepath="$PROJECT_DIR$/GlassCameraControl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../MyXML/MyXML.iml" filepath="$PROJECT_DIR$/../MyXML/MyXML.iml" />
     </modules>
   </component>
 </project>

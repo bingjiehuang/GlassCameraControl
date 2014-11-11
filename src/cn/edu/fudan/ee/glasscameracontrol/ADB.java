@@ -15,10 +15,10 @@ package cn.edu.fudan.ee.glasscameracontrol;
  * limitations under the License.
  */
 
-import java.io.File;
-
 import com.android.ddmlib.AndroidDebugBridge;
 import com.android.ddmlib.IDevice;
+
+import java.io.File;
 
 public class ADB {
     private AndroidDebugBridge mAndroidDebugBridge;
@@ -29,9 +29,9 @@ public class ADB {
         String adbLocation = System
                 .getProperty("com.android.screenshot.bindir");
 
-        // for debugging (follwing line is a example)
-//		adbLocation = "C:\\ ... \\android-sdk-windows\\platform-tools"; // Windows
-//		adbLocation = "/ ... /adt-bundle-mac-x86_64/sdk/platform-tools"; // MacOS X
+        // for debugging (follwing line is an example)
+        //		adbLocation = "C:\\ ... \\android-sdk-windows\\platform-tools"; // Windows
+        //		adbLocation = "/ ... /adt-bundle-mac-x86_64/sdk/platform-tools"; // MacOS X
 
         if (success) {
             if ((adbLocation != null) && (adbLocation.length() != 0)) {
