@@ -1,13 +1,9 @@
 package cn.edu.fudan.ee.glasscameracontrol;
 
-import cn.edu.fudan.ee.glasscamera.CameraParams;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
 
 public class XMLUI{
 
@@ -20,10 +16,8 @@ public class XMLUI{
     public JSlider[] slider = new JSlider[5];
     public JTextField[] textField = new JTextField[5];
     public JButton update;
-    static CameraParams cameraParams;
-    String folderPath;// 保存相机参数的文件夹路径(在本工程路径下)
-    String fileName;// 保存相机参数的文件名
-    FileOperation fileOperation = new FileOperation();// 文件操作类
+
+    FileOperation fileOperation = FileOperation.getInstance();// 文件操作类
 
     public static void main(String args[])
     {
@@ -32,20 +26,6 @@ public class XMLUI{
 
     public XMLUI()
     {
-        // 判断是否存在保存相机参数的序列化(.ser)文件
-        // 如果用户是第一次使用此服务端，则是没有此文件的，要创建；
-        // 如果已经存在此文件，则从此文件读取保存的相机参数
-        try {
-            folderPath = new File("").getCanonicalPath() + "\\savedInitialParams\\";
-            fileName = "savedInitialParams.ser";
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        cameraParams = fileOperation.createOrLoadParamsFromFile(folderPath, fileName);
-
-
         // 创建Frame
         jFrame = createJFrame(false, true, false, true, true, 0, 0, 650, 400, "GlassCameraControl");
         contentPane = jFrame.getContentPane();
@@ -58,7 +38,7 @@ public class XMLUI{
         int left = 20, top = 80, interval = 10, width1 = 80, height1 = 27, width2 = 200, height2 = 30, width3 = 30, height3 = 30;
         int[] min = new int[]{0, 0, -30, 0, 0};
         int[] max = new int[]{60, 10, 30, 100, 100};
-        int[] value = new int[]{cameraParams.params1, cameraParams.params2, cameraParams.params3, 50, 50};
+        int[] value = new int[]{fileOperation.myParams.params1, fileOperation.myParams.params2, fileOperation.myParams.params3, 50, 50};
         for(int i=0; i<slider.length; i++)
         {
             createJLabel(str1[i], left, top+i*height1+i*interval, width1, height1);

@@ -9,7 +9,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -24,10 +23,7 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
     private Socket socket;
     private ObjectOutputStream transToGlass;// 用于socket通信
     static XMLUI UI;// 创建界面
-    String folderPath;// 保存相机参数的文件夹路径(在本工程路径下)
-    String fileName;// 保存相机参数的文件名
-    String filePath;// 保存相机参数的文件路径
-    FileOperation fileOperation = new FileOperation();// 文件操作类
+    FileOperation fileOperation = FileOperation.getInstance();// 文件操作类
 
     public GlassCameraControl()
     {
@@ -40,17 +36,6 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
         }
         // 引入界面
         UI = new XMLUI();
-
-        // 获取保存相机参数的文件
-        try {
-            folderPath = new File("").getCanonicalPath() + "\\savedInitialParams\\";
-            fileName = "savedInitialParams.ser";
-            filePath = folderPath + fileName;
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
 
         // slider和textField的事件监听
         for(int i=0; i<UI.slider.length; i++)
@@ -156,16 +141,16 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
         // 更新参数
         if(e.getSource() == UI.update)
         {
-            XMLUI.cameraParams.params1 = UI.slider[0].getValue();
+            fileOperation.myParams.params1 = UI.slider[0].getValue();
             // 测试参数
-            XMLUI.cameraParams.params2 = UI.slider[1].getValue();
-            XMLUI.cameraParams.params3 = UI.slider[2].getValue();
+            fileOperation.myParams.params2 = UI.slider[1].getValue();
+            fileOperation.myParams.params3 = UI.slider[2].getValue();
             try {
                 System.out.println(socket.isClosed());
-                transToGlass.writeObject(XMLUI.cameraParams);
-                System.out.println(XMLUI.cameraParams.params1);
-                System.out.println(XMLUI.cameraParams.params2);
-                System.out.println(XMLUI.cameraParams.params3);
+                transToGlass.writeObject(fileOperation.myParams);
+                System.out.println("Update params1"+fileOperation.myParams.params1);
+                System.out.println("Update params1"+fileOperation.myParams.params2);
+                System.out.println("Update params1"+fileOperation.myParams.params3);
                 transToGlass.reset();// writeObject后，一定要reset()
 
             } catch (IOException e1) {
@@ -173,7 +158,7 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
             }
 
             // 更新完参数后立即保存更新后的参数到文件
-            fileOperation.saveParamsToFile(filePath, XMLUI.cameraParams);
+            fileOperation.saveMyParams(fileOperation.myParams);
         }
     }
 
@@ -198,10 +183,10 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
                     try
                     {
                         Object obj = receiveFromGlass.readObject();
-                        XMLUI.cameraParams = (CameraParams)obj;
-                        System.out.println("Receive params1 from glass:"+XMLUI.cameraParams.params1);
-                        System.out.println("Receive params2 from glass:"+XMLUI.cameraParams.params2);
-                        System.out.println("Receive params3 from glass:"+XMLUI.cameraParams.params3);
+                        fileOperation.myParams = (CameraParams)obj;
+                        System.out.println("Receive params1 from glass:"+fileOperation.myParams.params1);
+                        System.out.println("Receive params2 from glass:"+fileOperation.myParams.params2);
+                        System.out.println("Receive params3 from glass:"+fileOperation.myParams.params3);
                     }
                     catch(ClassNotFoundException e)
                     {
@@ -213,15 +198,15 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
                     }
 
                     // 修改界面控件显示值
-                    UI.slider[0].setValue(XMLUI.cameraParams.params1);
-                    UI.textField[0].setText(""+XMLUI.cameraParams.params1);
-                    UI.slider[1].setValue(XMLUI.cameraParams.params2);
-                    UI.textField[1].setText(""+XMLUI.cameraParams.params2);
-                    UI.slider[2].setValue(XMLUI.cameraParams.params3);
-                    UI.textField[2].setText(""+XMLUI.cameraParams.params3);
+                    UI.slider[0].setValue(fileOperation.myParams.params1);
+                    UI.textField[0].setText(""+fileOperation.myParams.params1);
+                    UI.slider[1].setValue(fileOperation.myParams.params2);
+                    UI.textField[1].setText(""+fileOperation.myParams.params2);
+                    UI.slider[2].setValue(fileOperation.myParams.params3);
+                    UI.textField[2].setText(""+fileOperation.myParams.params3);
 
                     // 从glass获取参数后要保存到文件
-                    fileOperation.saveParamsToFile(filePath, XMLUI.cameraParams);
+                    fileOperation.saveMyParams(fileOperation.myParams);
                 }
             }
             catch(IOException e)
