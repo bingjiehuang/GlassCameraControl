@@ -1,10 +1,12 @@
 package cn.edu.fudan.ee.glasscameracontrol;
 
 import cn.edu.fudan.ee.glasscamera.CameraParams;
+import cn.edu.fudan.ee.glasscameracontrol.projectGlassScreentoPC.MainFrame;
 import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.TimeoutException;
 
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
@@ -16,14 +18,17 @@ import java.net.Socket;
 public class GlassCameraControl implements ChangeListener, ActionListener {
     private int PC_LOCAL_PORT = 22222;
     private int ANDROID_PORT = 22222;
-    private ADB mADB;
+    public static ADB mADB;
     private IDevice[] mDevices;
-    private IDevice mDevice;
+    public static IDevice mDevice;
     static GlassCameraControl glass;
     private Socket socket;
     private ObjectOutputStream transToGlass;// 用于socket通信
     static XMLUI UI;// 创建界面
     FileOperation fileOperation = FileOperation.getInstance();// 文件操作类
+    private MainFrame mMainFrame;// 把Glass画面传送到PC
+    public static boolean alreadyProjectToPC = false;// 判断是否已开启传送画面
+    static String[] mArgs;
 
     public GlassCameraControl()
     {
@@ -34,6 +39,7 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
         if(mDevices != null){
             mDevice = mDevices[0];
         }
+
         // 引入界面
         UI = new XMLUI();
 
@@ -49,9 +55,12 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
         UI.setUpSocket.addActionListener(this);
         // 更新参数
         UI.update.addActionListener(this);
+        // 投影Glass画面到PC
+        UI.projectGlassScreenToPC.addActionListener(this);
     }
 
     public static void main(String[] args) {
+        mArgs = args;
         glass = new GlassCameraControl();
     }
 
@@ -107,6 +116,7 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
                 UI.device.setText("Device:"+glass.mDevice.getSerialNumber());
                 UI.detectDevice.setEnabled(false);
                 UI.setUpSocket.setEnabled(true);
+                UI.projectGlassScreenToPC.setEnabled(true);// 已经确保存在设备，所以使能按钮projectGlassScreenToPC
             }
         }
 
@@ -127,7 +137,7 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
                 socket = new Socket("localhost",PC_LOCAL_PORT);
                 UI.socketStatus.setText("OK");
                 UI.setUpSocket.setEnabled(false);
-                UI.update.setEnabled(true);
+                UI.update.setEnabled(true);// 使能更新按钮
                 transToGlass = new ObjectOutputStream(socket.getOutputStream());
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -158,7 +168,36 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
             }
 
             // 更新完参数后立即保存更新后的参数到文件
-            fileOperation.saveMyParams(fileOperation.myParams);
+            fileOperation.saveParams(fileOperation.myParams);
+        }
+
+        // 投影Glass画面到PC
+        if(e.getSource() == UI.projectGlassScreenToPC)
+        {
+            if(alreadyProjectToPC == false)// 尚未存在投射，则点击后，开启投射
+            {
+                // 投影
+                System.out.println("投影Glass画面到PC");
+                UI.projectGlassScreenToPC.setText("Disable projecting");
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        mMainFrame = new MainFrame(mArgs);
+                        mMainFrame.setLocation(0, 410);
+                        mMainFrame.setVisible(true);
+                        mMainFrame.selectDevice();
+                    }
+                });
+                alreadyProjectToPC = true;
+            }
+            else
+            {
+                // 断开投影
+                System.out.println("断开投影Glass画面到PC");
+                UI.projectGlassScreenToPC.setText("Enable projecting");
+                mMainFrame.dispose();// 关闭窗口
+                mMainFrame = null;
+                alreadyProjectToPC = false;
+            }
         }
     }
 
@@ -206,7 +245,7 @@ public class GlassCameraControl implements ChangeListener, ActionListener {
                     UI.textField[2].setText(""+fileOperation.myParams.params3);
 
                     // 从glass获取参数后要保存到文件
-                    fileOperation.saveMyParams(fileOperation.myParams);
+                    fileOperation.saveParams(fileOperation.myParams);
                 }
             }
             catch(IOException e)

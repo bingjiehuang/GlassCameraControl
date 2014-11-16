@@ -42,7 +42,7 @@ public class FileOperation {
         return myParams;
     }
 
-    public void saveMyParams(CameraParams cameraParams)
+    public void saveParams(CameraParams cameraParams)
     {
         saveParamsToFile(cameraParams);
     }

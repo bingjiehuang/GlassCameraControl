@@ -16,6 +16,8 @@ public class XMLUI{
     public JSlider[] slider = new JSlider[5];
     public JTextField[] textField = new JTextField[5];
     public JButton update;
+    public JPanel cameraView;
+    public JButton projectGlassScreenToPC;
 
     FileOperation fileOperation = FileOperation.getInstance();// 文件操作类
 
@@ -46,6 +48,8 @@ public class XMLUI{
             textField[i] = createJTextField(Integer.toString(value[i]),left+width1+width2+2*interval, top+i*height3+i*interval, width3, height3);
         }
         update = createJButton(false, "Update", 1, 330, 648, 40);
+//        cameraView = createJPanel(true, Color.black, 10, 390, 640, 480);
+        projectGlassScreenToPC = createJButton(false, "Enable projecting", 420, 100, 200, 30);
 
         jFrame.repaint();
     }
@@ -87,15 +91,15 @@ public class XMLUI{
     }
 
     // createJPanel
-//    public JPanel createJPanel(boolean visible, int left, int top, int width, int height) {
-//        JPanel jPanel = new JPanel();
-//        jPanel.setLayout(null);
-//        jPanel.setVisible(visible);
-//        jPanel.setBounds(left,top,width,height);
-//        jPanel.setBackground(Color.LIGHT_GRAY);
-//        contentPane.add(jPanel, null);
-//        return jPanel;
-//    }
+    public JPanel createJPanel(boolean visible, Color color, int left, int top, int width, int height) {
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(null);
+        jPanel.setVisible(visible);
+        jPanel.setBackground(color);
+        jPanel.setBounds(left,top,width,height);
+        contentPane.add(jPanel, null);
+        return jPanel;
+    }
 
     // createJLabel
     public JLabel createJLabel(String name, int left, int top, int width, int height)
